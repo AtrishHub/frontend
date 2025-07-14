@@ -1,5 +1,3 @@
-import { handleAuth } from '@auth0/nextjs-auth0';
+import { Auth0Client } from "@auth0/nextjs-auth0/server"
 
-const handler = handleAuth();
-
-export { handler as GET, handler as POST };
+export const auth0 = new Auth0Client()

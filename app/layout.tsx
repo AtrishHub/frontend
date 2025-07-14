@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { UserProvider } from '@auth0/nextjs-auth0/client';
 
 import "./globals.css";
 

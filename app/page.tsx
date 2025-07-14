@@ -1,39 +1,45 @@
-import { auth0 } from '@/lib/auth0';
 
-export default async function HomePage() {
+import { auth0 } from "@/lib/auth0";
+import { redirect } from "next/navigation";
+
+
+export default async function Home() {
+  
   const session = await auth0.getSession();
 
   if (!session) {
+    redirect("auth/login");
+  }
+  console.log('Session:', session);
+  let protectedData;
+  let error = null;
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const res = await fetch(`${baseUrl}/api/proxy/protected-route`);
+    if (res.status === 401) {
+      redirect("auth/login");
+    }
+    protectedData = await res.json();
+  } catch (err) {
+    console.error("Proxy call error:", err);
+    throw err;
+  }
+
+  if (error) {
     return (
-      <main className="p-8 text-center">
-        <h1 className="text-2xl font-semibold">Welcome to My App</h1>
-        <div className="mt-4 space-x-4">
-          <a
-            href="/auth/login?screen_hint=signup"
-            className="bg-blue-600 text-white px-4 py-2 rounded"
-          >
-            Sign Up
-          </a>
-          <a
-            href="/auth/login"
-            className="bg-green-600 text-white px-4 py-2 rounded"
-          >
-            Log In
-          </a>
-        </div>
+      <main>
+        <h1>Welcome, {session.user.name}!</h1>
+        <p style={{ color: "red" }}>{error}</p>
+        <a href="/auth/logout">Log Out</a>
       </main>
     );
   }
 
   return (
-    <main className="p-8 text-center">
-      <h1 className="text-2xl font-bold">Welcome, {session.user.name}!</h1>
-      <a
-        href="/auth/logout"
-        className="mt-4 inline-block bg-red-600 text-white px-4 py-2 rounded"
-      >
-        Log Out
-      </a>
+    <main>
+      <h1>Welcome, {session.user.name}!</h1>
+      <p>Protected API says: {protectedData.message}</p>
+      <a href="/auth/logout">Log Out</a>
     </main>
   );
 }
