@@ -1,13 +1,10 @@
-import { auth0 } from '../lib/auth0'
-import { getToken } from '@/lib/getToken'; // Adjust path if your auth0 client is elsewhere
+import { auth0 } from '../lib/auth0';
+import api from '@/lib/api';
 
 export default async function Home() {
-
   const session = await auth0.getSession();
-  const accesstoken= await session?.tokenSet.accessToken;
-  console.log(accesstoken);
-
-
+  const accessToken = session?.tokenSet?.accessToken;
+  console.log(accessToken);
   if (!session) {
     return (
       <main>
@@ -16,11 +13,30 @@ export default async function Home() {
       </main>
     );
   }
+
+
+  let protectedData = null;
+  let error = null;
+  try {
+    const response = await api.get('/auth', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    protectedData = response.data;
+  } catch (err) {
+    error = err;
+  }
+
   return (
     <main>
       <h1>Welcome, {session.user.name}!</h1>
+      {error ? (
+        <p style={{ color: 'red' }}>Error fetching protected data: {error.toString()}</p>
+      ) : (
+        <p>Protected API says: {protectedData ? protectedData.message: 'Loading...'}</p>
+      )}
       <a href="/auth/logout">Logout</a>
-
     </main>
   );
 }
