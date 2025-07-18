@@ -1,5 +1,6 @@
 import { auth0 } from '../lib/auth0';
 import api from '@/lib/api';
+import { Header } from '@/components/Header';
 
 export default async function Home() {
   const session = await auth0.getSession();
@@ -30,6 +31,7 @@ export default async function Home() {
 
   return (
     <main>
+      <Header/>
       <h1>Welcome, {session.user.name}!</h1>
       {error ? (
         <p style={{ color: 'red' }}>Error fetching protected data: {error.toString()}</p>
